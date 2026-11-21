@@ -1,0 +1,214 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ---- Global Hardened Primitives ----
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerifiedUser()
+        && request.auth.token.email == 'prem455@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin()
+        || (isVerifiedUser() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isOwner(ownerId) {
+      return isVerifiedUser() && request.auth.uid == ownerId;
+    }
+
+    function isOptionalString(data, key, maxLen) {
+      return !(key in data) || (data[key] is string && data[key].size() <= maxLen);
+    }
+
+    function isOptionalIntRange(data, key, minVal, maxVal) {
+      return !(key in data) || (data[key] is int && data[key] >= minVal && data[key] <= maxVal);
+    }
+
+    function isBoundedIntList(listVal, maxItems) {
+      return listVal is list
+        && listVal.size() <= maxItems
+        && (listVal.size() == 0 || listVal[0] is int);
+    }
+
+    // ---- Validation Blueprints ----
+    function isValidAdminUser(data) {
+      return data.keys().hasAll(['email', 'displayName', 'role', 'createdAt'])
+        && data.keys().hasOnly(['email', 'displayName', 'role', 'createdAt'])
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 160
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120
+        && data.role in ['admin', 'advisor']
+        && data.createdAt is timestamp;
+    }
+
+    function isValidDiscoveryBrief(data) {
+      return data.keys().hasAll([
+          'ownerId', 'ownerEmail', 'customerName', 'customerPhone',
+          'people', 'painPoints', 'cats', 'followUps',
+          'moments', 'rooms', 'control', 'existing',
+          'leadScore', 'leadTemp', 'scopeTier', 'budgetTier',
+          'status', 'advisorNotes', 'orbiRef', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'ownerEmail', 'customerName', 'customerPhone', 'customerEmail', 'area',
+          'sourceIndex', 'propertyTypeIndex', 'sizeIndex', 'stageIndex', 'electricalIndex', 'ownershipIndex',
+          'people', 'techComfortIndex', 'deciderIndex', 'painPoints', 'painPointNotes',
+          'cats', 'followUps', 'moments', 'rooms', 'control', 'keypadIndex', 'existing',
+          'budgetIndex', 'emiIndex', 'phaseIndex', 'timelineIndex', 'designerIndex', 'designerName',
+          'consultIndex', 'notes', 'leadScore', 'leadTemp', 'scopeTier', 'budgetTier',
+          'status', 'advisorNotes', 'orbiRef', 'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.ownerId)
+        && data.ownerEmail is string && data.ownerEmail.size() <= 160
+        && data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 120
+        && data.customerPhone is string && data.customerPhone.size() >= 7 && data.customerPhone.size() <= 32
+        && isOptionalString(data, 'customerEmail', 160)
+        && isOptionalString(data, 'area', 160)
+        && isOptionalIntRange(data, 'sourceIndex', 0, 20)
+        && isOptionalIntRange(data, 'propertyTypeIndex', 0, 20)
+        && isOptionalIntRange(data, 'sizeIndex', 0, 20)
+        && isOptionalIntRange(data, 'stageIndex', 0, 20)
+        && isOptionalIntRange(data, 'electricalIndex', 0, 20)
+        && isOptionalIntRange(data, 'ownershipIndex', 0, 20)
+        && isBoundedIntList(data.people, 15)
+        && isOptionalIntRange(data, 'techComfortIndex', 0, 10)
+        && isOptionalIntRange(data, 'deciderIndex', 0, 10)
+        && isBoundedIntList(data.painPoints, 20)
+        && isOptionalString(data, 'painPointNotes', 1000)
+        && data.cats is map && data.cats.size() <= 20
+        && data.followUps is map && data.followUps.size() <= 20
+        && isBoundedIntList(data.moments, 20)
+        && isBoundedIntList(data.rooms, 25)
+        && isBoundedIntList(data.control, 15)
+        && isOptionalIntRange(data, 'keypadIndex', 0, 10)
+        && isBoundedIntList(data.existing, 15)
+        && isOptionalIntRange(data, 'budgetIndex', 0, 15)
+        && isOptionalIntRange(data, 'emiIndex', 0, 10)
+        && isOptionalIntRange(data, 'phaseIndex', 0, 10)
+        && isOptionalIntRange(data, 'timelineIndex', 0, 10)
+        && isOptionalIntRange(data, 'designerIndex', 0, 10)
+        && isOptionalString(data, 'designerName', 120)
+        && isOptionalIntRange(data, 'consultIndex', 0, 10)
+        && isOptionalString(data, 'notes', 1500)
+        && data.leadScore is int && data.leadScore >= 0 && data.leadScore <= 100
+        && data.leadTemp in ['Hot', 'Warm', 'Early stage']
+        && data.scopeTier is int && data.scopeTier >= 0 && data.scopeTier <= 3
+        && data.budgetTier is int && data.budgetTier >= -1 && data.budgetTier <= 3
+        && data.status in ['new', 'contacted', 'site_visit', 'quoted', 'won', 'archived']
+        && data.advisorNotes is string && data.advisorNotes.size() <= 2000
+        && data.orbiRef is string && data.orbiRef.size() <= 4000
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    // ---- Admins Directory ----
+    match /admins/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(userId)
+        && isAdmin()
+        && isValidAdminUser(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if isValidId(userId)
+        && isAdmin()
+        && isValidAdminUser(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['email', 'displayName', 'role']);
+      allow delete: if isValidId(userId) && isBootstrappedAdmin();
+    }
+
+    // ---- Discovery Briefs (Centralized Database) ----
+    match /discoveries/{briefId} {
+      allow get: if isValidId(briefId) && isVerifiedUser() && (
+        existing().ownerId == request.auth.uid || isAdmin()
+      );
+
+      allow list: if isVerifiedUser() && (
+        resource.data.ownerId == request.auth.uid || isAdmin()
+      );
+
+      allow create: if isValidId(briefId)
+        && isVerifiedUser()
+        && isValidDiscoveryBrief(incoming())
+        && incoming().ownerId == request.auth.uid
+        && (isAdmin() || incoming().ownerEmail == request.auth.token.email)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && (
+          isAdmin()
+          || (incoming().status == 'new' && incoming().advisorNotes == '')
+        );
+
+      allow update: if isValidId(briefId)
+        && isVerifiedUser()
+        && isValidDiscoveryBrief(incoming())
+        && incoming().ownerId == existing().ownerId
+        && incoming().ownerEmail == existing().ownerEmail
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          // Tier 1: Orbi Admin / Advisor can update any content or pipeline fields
+          (
+            isAdmin()
+            && incoming().diff(existing()).affectedKeys().hasOnly([
+              'customerName', 'customerPhone', 'customerEmail', 'area',
+              'sourceIndex', 'propertyTypeIndex', 'sizeIndex', 'stageIndex', 'electricalIndex', 'ownershipIndex',
+              'people', 'techComfortIndex', 'deciderIndex', 'painPoints', 'painPointNotes',
+              'cats', 'followUps', 'moments', 'rooms', 'control', 'keypadIndex', 'existing',
+              'budgetIndex', 'emiIndex', 'phaseIndex', 'timelineIndex', 'designerIndex', 'designerName',
+              'consultIndex', 'notes', 'leadScore', 'leadTemp', 'scopeTier', 'budgetTier',
+              'status', 'advisorNotes', 'orbiRef', 'updatedAt'
+            ])
+          )
+          ||
+          // Tier 2: Brief Owner can update discovery answers while not in terminal state
+          (
+            existing().ownerId == request.auth.uid
+            && existing().status != 'won'
+            && existing().status != 'archived'
+            && incoming().status == existing().status
+            && incoming().advisorNotes == existing().advisorNotes
+            && incoming().diff(existing()).affectedKeys().hasOnly([
+              'customerName', 'customerPhone', 'customerEmail', 'area',
+              'sourceIndex', 'propertyTypeIndex', 'sizeIndex', 'stageIndex', 'electricalIndex', 'ownershipIndex',
+              'people', 'techComfortIndex', 'deciderIndex', 'painPoints', 'painPointNotes',
+              'cats', 'followUps', 'moments', 'rooms', 'control', 'keypadIndex', 'existing',
+              'budgetIndex', 'emiIndex', 'phaseIndex', 'timelineIndex', 'designerIndex', 'designerName',
+              'consultIndex', 'notes', 'leadScore', 'leadTemp', 'scopeTier', 'budgetTier',
+              'orbiRef', 'updatedAt'
+            ])
+          )
+        );
+
+      allow delete: if isValidId(briefId) && isVerifiedUser() && (
+        isAdmin()
+        || (existing().ownerId == request.auth.uid && existing().status == 'new')
+      );
+    }
+  }
+}

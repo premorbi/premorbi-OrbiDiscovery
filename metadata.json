@@ -1,0 +1,6 @@
+{
+  "name": "Orbi Smart Home Discovery",
+  "description": "Structured customer discovery questionnaire, pain-point tracker, visual smart home planner, centralized Firestore database, and WhatsApp brief sharing for Orbi Automatify.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

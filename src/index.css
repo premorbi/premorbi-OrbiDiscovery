@@ -1,0 +1,178 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --orbi-bg: #ffffff;
+  --orbi-surface: #f4f7fb;
+  --orbi-card: #ffffff;
+  --orbi-ink: #071936;
+  --orbi-mute: #4a5d7a;
+  --orbi-line: #d4dfee;
+  --orbi-navy: #061a3b;
+  --orbi-teal: #0b4ea2;
+  --orbi-gold: #c4932b;
+  --orbi-onteal: #ffffff;
+  --orbi-glow: #ffd166;
+  --orbi-sky: #e4eef9;
+  --orbi-wall: #ffffff;
+  --orbi-win: #cad9ec;
+  --orbi-roof: #061a3b;
+  --orbi-grass: #d2e4d8;
+  --orbi-leaf: #4d9165;
+  --orbi-s0: #222a38;
+  --orbi-s1: #4e6380;
+  --orbi-s2: #3b6399;
+  --orbi-s3: #5b7da8;
+  --orbi-s4: #7b5a3e;
+  --orbi-s5: #7d96b8;
+  --orbi-s6: #93a7c2;
+  --orbi-s7: #e5ecf4;
+  --orbi-s8: #edf1f7;
+  --orbi-s9: #f4f7fb;
+}
+
+.dark {
+  color-scheme: dark;
+  --orbi-bg: #051024;
+  --orbi-surface: #0c1f3d;
+  --orbi-card: #091833;
+  --orbi-ink: #eaf1fb;
+  --orbi-mute: #9eb3d1;
+  --orbi-line: #1e375e;
+  --orbi-navy: #040d1d;
+  --orbi-teal: #3b82f6;
+  --orbi-gold: #e0b44c;
+  --orbi-onteal: #ffffff;
+  --orbi-glow: #ffd166;
+  --orbi-sky: #091b38;
+  --orbi-wall: #132c54;
+  --orbi-win: #10264a;
+  --orbi-roof: #264c85;
+  --orbi-grass: #102d26;
+  --orbi-leaf: #2e784f;
+  --orbi-s0: #09111e;
+  --orbi-s1: #8ea6c7;
+  --orbi-s2: #284b7a;
+  --orbi-s3: #7697bf;
+  --orbi-s4: #5c4330;
+  --orbi-s5: #5a7aa3;
+  --orbi-s6: #5a7aa3;
+  --orbi-s7: #152b4d;
+  --orbi-s8: #cfdbe9;
+  --orbi-s9: #dce5f0;
+}
+
+@layer base {
+  body {
+    background-color: var(--orbi-bg);
+    color: var(--orbi-ink);
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    overflow-x: clip;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .font-mono-tabular {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Interactive House Illustration States */
+.villa-win {
+  fill: var(--orbi-win);
+  transition: fill 0.5s ease;
+}
+
+.villa-part {
+  transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), fill 0.45s ease;
+}
+
+.lgt .villa-win,
+.lgt .villa-lamp {
+  fill: var(--orbi-glow);
+}
+
+.villa-cur {
+  fill: #6c93c4;
+  transform-box: fill-box;
+}
+
+.dark .villa-cur {
+  fill: #4b75ab;
+}
+
+.villa-cur-l {
+  transform-origin: left center;
+}
+
+.villa-cur-r {
+  transform-origin: right center;
+}
+
+.shd .villa-cur-l,
+.shd .villa-cur-r {
+  transform: scaleX(0.28);
+}
+
+.villa-fx {
+  opacity: 0;
+}
+
+.clm .villa-air,
+.sec .villa-cone,
+.net .villa-wifi,
+.aco .villa-hex,
+.out .villa-beam,
+.out .villa-spr,
+.av .villa-wave {
+  opacity: 1;
+}
+
+.av .villa-tv {
+  fill: #3b82f6;
+}
+
+.saf .villa-smoke {
+  fill: #ef5b3a;
+}
+
+.sec .villa-camlight,
+.sec .villa-bell {
+  fill: var(--orbi-gold);
+}
+
+.ene .villa-sol {
+  fill: #2563eb;
+}
+
+.villa-lvl {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  transform: scaleY(0.35);
+  fill: #96b0d1;
+}
+
+.dark .villa-lvl {
+  fill: #2e4f7d;
+}
+
+.wat .villa-lvl {
+  transform: scaleY(1);
+  fill: #3b82f6;
+}
+
+.gat .villa-gate {
+  transform: translateX(-34px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .villa-win,
+  .villa-part {
+    transition: none !important;
+  }
+}

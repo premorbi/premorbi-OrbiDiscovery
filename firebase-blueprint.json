@@ -1,0 +1,257 @@
+{
+  "entities": {
+    "DiscoveryBrief": {
+      "title": "DiscoveryBrief",
+      "description": "Structured smart home customer discovery brief including property profile, pain points, feature priorities, sizing follow-ups, budget/timeline, and advisor tracking.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the user who created the brief.",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerEmail": {
+          "type": "string",
+          "description": "Verified email address of the creator.",
+          "maxLength": 160
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Customer full name.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Customer mobile phone number.",
+          "minLength": 7,
+          "maxLength": 32
+        },
+        "customerEmail": {
+          "type": "string",
+          "description": "Optional customer email address.",
+          "maxLength": 160
+        },
+        "area": {
+          "type": "string",
+          "description": "Locality and city of the home.",
+          "maxLength": 160
+        },
+        "sourceIndex": {
+          "type": "integer",
+          "description": "How the customer heard about Orbi."
+        },
+        "propertyTypeIndex": {
+          "type": "integer",
+          "description": "Type of residential or commercial property."
+        },
+        "sizeIndex": {
+          "type": "integer",
+          "description": "Home size tier from 1 BHK to 5 BHK+."
+        },
+        "stageIndex": {
+          "type": "integer",
+          "description": "Construction or renovation stage."
+        },
+        "electricalIndex": {
+          "type": "integer",
+          "description": "Electrical wiring readiness."
+        },
+        "ownershipIndex": {
+          "type": "integer",
+          "description": "Owned vs rented property."
+        },
+        "people": {
+          "type": "array",
+          "description": "Household occupant profile indices."
+        },
+        "techComfortIndex": {
+          "type": "integer",
+          "description": "Household comfort level with smart technology."
+        },
+        "deciderIndex": {
+          "type": "integer",
+          "description": "Primary decision maker."
+        },
+        "painPoints": {
+          "type": "array",
+          "description": "Identified home friction and pain point indices."
+        },
+        "painPointNotes": {
+          "type": "string",
+          "description": "Free-text customer pain point notes.",
+          "maxLength": 1000
+        },
+        "cats": {
+          "type": "object",
+          "description": "Map of smart home category IDs to priority (0=Not needed, 1=Nice to have, 2=Must have)."
+        },
+        "followUps": {
+          "type": "object",
+          "description": "Nested map of sizing follow-up responses per must-have category."
+        },
+        "moments": {
+          "type": "array",
+          "description": "Selected daily lifestyle outcome indices."
+        },
+        "rooms": {
+          "type": "array",
+          "description": "Selected rooms and zones indices."
+        },
+        "control": {
+          "type": "array",
+          "description": "Preferred control interface indices."
+        },
+        "keypadIndex": {
+          "type": "integer",
+          "description": "Wall switch aesthetic preference."
+        },
+        "existing": {
+          "type": "array",
+          "description": "Existing devices already owned."
+        },
+        "budgetIndex": {
+          "type": "integer",
+          "description": "Selected automation budget range index."
+        },
+        "emiIndex": {
+          "type": "integer",
+          "description": "EMI financing preference."
+        },
+        "phaseIndex": {
+          "type": "integer",
+          "description": "Phased vs all-at-once rollout preference."
+        },
+        "timelineIndex": {
+          "type": "integer",
+          "description": "Target project timeline."
+        },
+        "designerIndex": {
+          "type": "integer",
+          "description": "Whether an architect or interior designer is involved."
+        },
+        "designerName": {
+          "type": "string",
+          "description": "Architect or interior studio name.",
+          "maxLength": 120
+        },
+        "consultIndex": {
+          "type": "integer",
+          "description": "Preferred next consultation step."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional customer notes.",
+          "maxLength": 1500
+        },
+        "leadScore": {
+          "type": "integer",
+          "description": "Computed lead qualification score (0-100)."
+        },
+        "leadTemp": {
+          "type": "string",
+          "enum": ["Hot", "Warm", "Early stage"],
+          "description": "Computed lead temperature classification.",
+          "maxLength": 20
+        },
+        "scopeTier": {
+          "type": "integer",
+          "description": "Computed scope tier index (0-3)."
+        },
+        "budgetTier": {
+          "type": "integer",
+          "description": "Mapped budget tier index (-1 if not specified, else 0-3)."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["new", "contacted", "site_visit", "quoted", "won", "archived"],
+          "description": "Advisor pipeline workflow status.",
+          "maxLength": 20
+        },
+        "advisorNotes": {
+          "type": "string",
+          "description": "Internal advisor follow-up notes.",
+          "maxLength": 2000
+        },
+        "orbiRef": {
+          "type": "string",
+          "description": "Base64-encoded ORBI-REF portable token for WhatsApp import/export.",
+          "maxLength": 4000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last-modified timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "ownerEmail",
+        "customerName",
+        "customerPhone",
+        "people",
+        "painPoints",
+        "cats",
+        "followUps",
+        "moments",
+        "rooms",
+        "control",
+        "existing",
+        "leadScore",
+        "leadTemp",
+        "scopeTier",
+        "budgetTier",
+        "status",
+        "advisorNotes",
+        "orbiRef",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized Orbi advisor/admin profile granting access to the centralized discovery database.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Verified Orbi team member email.",
+          "maxLength": 160
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Advisor display name.",
+          "maxLength": 120
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "advisor"],
+          "description": "Team permission role.",
+          "maxLength": 20
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        }
+      },
+      "required": ["email", "displayName", "role", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/discoveries/{briefId}": {
+      "schema": { "$ref": "#/entities/DiscoveryBrief" },
+      "description": "Centralized customer discovery briefs with strict owner/admin PII isolation."
+    },
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Orbi team advisor/admin access directory."
+    }
+  }
+}

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbi Smart Home Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday, warm and calm: a conversation, not a sales pitch
+   IDEA a design consultation brief: the customer's own home lights up as they choose what they want
+   PICTURE a Bangalore villa section (terrace tank, solar, gate, garden) whose parts switch on per chosen feature
+   COLOUR Orbi navy band, white ground, teal for choices, warm lamp-light only where lights are on
+   TYPE Outfit + Inter
+   LAYOUT laptop: form left, sticky house + live brief right; phone: slim house strip, form, sticky next bar */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0a1724);--card:light-dark(#ffffff,#10243a);--soft:light-dark(#eef6f9,#132c45);--ink:light-dark(#0f2236,#e6f1f7);--mute:light-dark(#4b6074,#a3b9ca);--line:light-dark(#d3e2ea,#26445f);--navy:light-dark(#0f2a44,#071422);--teal:light-dark(#0b7f82,#3cc3c0);--onteal:light-dark(#ffffff,#03201f);--glow:#ffc95c;--warn:light-dark(#a8401a,#ff9c78);--sky:light-dark(#dcEFf7,#0d2238);--wall:light-dark(#ffffff,#1c3a57);--win:light-dark(#c9dfeb,#16324e);--roof:light-dark(#0f2a44,#2a4e74);--grass:light-dark(#cfe6d6,#123129);--leaf:light-dark(#4f9a6a,#2f7a50);--s0:light-dark(#2b2b2b,#0c0c0c);--s1:light-dark(#5b6f80,#8fa7ba);--s2:light-dark(#5d7f99,#2f4f6c);--s3:light-dark(#6b8aa0,#7fa2bb);--s4:light-dark(#7b5a3e,#5c4330);--s5:light-dark(#8aa3b5,#5d7d96);--s6:light-dark(#9aaebd,#5d7d96);--s7:light-dark(#e3ebef,#1d3448);--s8:light-dark(#e9eef1,#cfdbe4);--s9:light-dark(#f2f5f7,#d7e2ea);}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Outfit,Inter,sans-serif;letter-spacing:-.02em;line-height:1.05;margin:0}
+.top{background:var(--navy);color:#fff;padding:22px max(5vw,16px) 18px}
+.brand{font:600 15px Outfit,sans-serif;opacity:.85;margin-bottom:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand .tag{background:#3cc3c0;color:#03201f;border-radius:999px;padding:2px 10px;font-size:13px;display:none}
+.advisor .brand .tag{display:inline-block}
+.top h1{font-size:clamp(32px,4.6vw,48px);font-weight:600;text-wrap:balance;max-width:16ch}
+.top p{margin:10px 0 18px;color:#c9dbe8;max-width:60ch}
+.steps{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.steps button{flex:none;min-height:40px;padding:8px 14px;border-radius:999px;border:1px solid #33506e;background:transparent;color:#d6e5ef;font:500 14px Inter,sans-serif;cursor:pointer}
+.steps button.done{color:#fff;border-color:#3cc3c0}
+.steps button.done::before{content:"✓ ";color:#3cc3c0}
+.steps button[aria-current=step]{background:#fff;color:#0f2a44;border-color:#fff}
+.wrap{max-width:1240px;margin:0 auto;padding:28px max(5vw,16px) 120px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.85fr);gap:32px;align-items:start}
+.aside{position:sticky;top:16px;display:grid;gap:14px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(18px,3vw,30px)}
+.fig{position:relative;height:300px;border-radius:16px;overflow:hidden;background:var(--sky);border:1px solid var(--line)}
+.fig svg{position:absolute;inset:0;width:100%;height:100%}
+.mini h3{font-size:18px;margin-bottom:8px}
+.mini .lit{display:flex;flex-wrap:wrap;gap:6px}
+.mini .lit span{background:var(--soft);border-radius:999px;padding:4px 10px;font-size:13px}
+.mini .lit span.m{background:var(--teal);color:var(--onteal)}
+.mini p{color:var(--mute);font-size:14px;margin:0}
+.bar{height:8px;background:var(--soft);border-radius:8px;overflow:hidden;margin:10px 0 4px}
+.bar i{display:block;height:100%;background:var(--teal);border-radius:8px;transition:width .4s}
+.sh{font-size:clamp(26px,3vw,34px);margin-bottom:6px}
+.sub{color:var(--mute);margin:0 0 24px}
+.q{margin:0 0 26px}
+.qt{display:block;font-weight:600;margin-bottom:10px}
+.qt small{font-weight:400;color:var(--mute)}
+input,textarea{font:inherit;font-size:16px;width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+textarea{min-height:96px;resize:vertical}
+input:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid color-mix(in srgb,var(--teal) 55%,transparent);outline-offset:2px}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:9px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:500 15px Inter,sans-serif;cursor:pointer;text-align:left}
+.chip:hover{border-color:var(--teal)}
+.chip[aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:var(--onteal)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.card{border:1.5px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px;background:var(--card)}
+.card.v2{border-color:var(--teal);box-shadow:inset 0 0 0 1px var(--teal)}
+.card.v1{border-color:var(--teal);border-style:dashed}
+.card.v0{opacity:.6}
+.card h3{font-size:18px}
+.card p{margin:0;font-size:14px;color:var(--mute)}
+.card .eg{font-size:13px;color:var(--ink)}
+.card.v2{grid-column:1/-1}
+.card.v2 .seg{max-width:440px}
+.fu{display:none;border-top:1px dashed var(--line);padding-top:14px;margin-top:6px;gap:14px}
+.card.v2 .fu{display:grid}
+.fuh{margin:0;font-size:14px;color:var(--teal);font-weight:500}
+.fu .qt{font-size:15px;margin-bottom:6px}
+.fu .chip{min-height:40px;font-size:14px;padding:7px 13px}
+@media(min-width:760px){.card.v2{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);column-gap:28px;align-items:start;grid-template-rows:auto auto auto 1fr}.card.v2>h3,.card.v2>p,.card.v2>.eg,.card.v2>.seg{grid-column:1}.card.v2>h3{margin-bottom:8px}.card.v2>p,.card.v2>.eg{margin-bottom:8px}.card.v2 .fu{grid-column:2;grid-row:1/span 4;border-top:0;border-left:1px dashed var(--line);padding:0 0 0 24px;margin:0}}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1.5px solid var(--line);border-radius:10px;overflow:hidden;margin-top:auto}
+.seg button{min-height:44px;border:0;border-left:1px solid var(--line);background:transparent;color:var(--ink);font:500 13px Inter,sans-serif;cursor:pointer;padding:4px}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed=true]{background:var(--teal);color:var(--onteal)}
+.tog{border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--card);color:var(--ink);text-align:left;cursor:pointer;font:inherit;min-height:44px}
+.tog b{display:block;font:600 16px Outfit,sans-serif;margin-bottom:4px}
+.tog span{font-size:14px;color:var(--mute)}
+.tog[aria-pressed=true]{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 12%,var(--card))}
+.tog[aria-pressed=true] b::after{content:" ✓";color:var(--teal)}
+.err{color:var(--warn);font-size:14px;margin-top:6px;min-height:1em}
+.nav{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(6px);border-top:1px solid var(--line);padding:12px max(5vw,16px) calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:12px;justify-content:space-between;align-items:center;z-index:5}
+.nav .mid{color:var(--mute);font-size:14px;flex:1;text-align:center}
+.btn{min-height:46px;padding:10px 22px;border-radius:12px;border:1.5px solid var(--teal);background:var(--teal);color:var(--onteal);font:600 16px Inter,sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn[hidden]{display:none}
+.wa{background:#1f9d55;border-color:#1f9d55;color:#fff}
+.brief dl{display:grid;grid-template-columns:minmax(7em,auto) minmax(0,1fr);gap:8px 18px;margin:0}
+.brief dt{color:var(--mute);font-size:14px;padding-top:2px}
+.brief dd{margin:0}
+.brief h3{font-size:20px;margin:22px 0 10px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 8px}
+.note{font-size:14px;color:var(--mute)}
+details{margin-top:12px}
+summary{cursor:pointer;color:var(--teal);font-weight:500}
+.adv{border:2px solid var(--teal);border-radius:16px;padding:clamp(16px,2.5vw,24px);margin-bottom:22px;background:color-mix(in srgb,var(--teal) 6%,var(--card))}
+.adv h2{font-size:24px;margin-bottom:12px}
+.adv h3{font-size:17px;margin:18px 0 8px}
+.adv ul{margin:0;padding-left:20px}
+.adv li{margin-bottom:6px}
+.temp{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.temp b{font:700 clamp(30px,4vw,40px) Outfit,sans-serif}
+.temp.hot b{color:var(--warn)}
+.temp.warm b{color:var(--teal)}
+.temp.cold b{color:var(--mute)}
+.ladder{display:grid;grid-template-columns:6.5em repeat(4,minmax(0,1fr));gap:6px;align-items:center;font-size:13px;margin-top:6px}
+.ladder .c{height:30px;border-radius:6px;background:var(--soft);display:flex;align-items:center;justify-content:center;text-align:center;padding:0 4px;line-height:1.1}
+.ladder .c.x{background:var(--teal);color:var(--onteal);font-weight:600}
+.ladder .h{color:var(--mute);text-align:center}
+.paste{display:grid;gap:10px;margin-bottom:14px}
+.hidden{display:none!important}
+.win{fill:var(--win);transition:fill .6s}
+svg .p{transition:opacity .6s,transform .6s,fill .6s}
+.lgt .win{fill:var(--glow)}
+.lgt .lamp{fill:var(--glow)}
+.cur{fill:light-dark(#7aa6c2,#4f7fa3);transform-box:fill-box}
+.curL{transform-origin:left center}.curR{transform-origin:right center}
+.shd .curL,.shd .curR{transform:scaleX(.28)}
+.fx{opacity:0}
+.clm .air,.sec .cone,.net .wifi,.aco .hex,.out .beam,.out .spr,.av .wave{opacity:1}
+.av .tv{fill:#4fb7ff}
+.saf .smoke{fill:#ff6b4a}
+.sec .camlight,.sec .bell{fill:#3cc3c0}
+.ene .sol{fill:#3d8fd6}
+.wat .lvl{transform:scaleY(1);fill:#3cc3c0}
+.lvl{transform-box:fill-box;transform-origin:bottom;transform:scaleY(.35);fill:light-dark(#9bb9cc,#35597a)}
+.gat .gate{transform:translateX(-34px)}
+@media(max-width:900px){.wrap{grid-template-columns:minmax(0,1fr);gap:18px}.aside{position:static;order:-1}.fig{height:200px}.mini{display:none}}
+@media(max-width:600px){.nav .mid{display:none}.btn{padding:10px 16px}.brief dl{grid-template-columns:minmax(0,1fr);gap:2px}.brief dd{margin-bottom:8px}.ladder{grid-template-columns:5.2em repeat(4,minmax(0,1fr));font-size:12px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span>Orbi Automatify</span><span class="tag">Orbi team view</span></div>
+  <h1>Plan your smart home</h1>
+  <p>About ten minutes. Tell us how you live and what matters to you, and we will design around that, not around a catalogue.</p>
+  <nav class="steps" id="steps" aria-label="Steps"></nav>
+</header>
+
+<main class="wrap">
+  <section>
+    <div class="adv hidden" id="advbox">
+      <h2>Load a customer's brief</h2>
+      <div class="paste">
+        <label class="qt" for="pastein">Paste the WhatsApp or email message the customer sent</label>
+        <textarea id="pastein" placeholder="Paste the whole message. The ORBI-REF line at the end is what gets read."></textarea>
+        <div class="err" id="pasteerr"></div>
+        <div class="chips">
+          <button class="btn" id="loadbtn" type="button">Load brief</button>
+          <button class="btn ghost" id="newbtn" type="button">New walk-in</button>
+          <button class="btn ghost" id="samplebtn" type="button">Load sample</button>
+        </div>
+      </div>
+      <p class="note">Filling it in with a customer at the centre? Start a new walk-in and go through the steps together. The analysis appears on the last step.</p>
+    </div>
+    <form class="panel" id="form" novalidate></form>
+  </section>
+
+  <aside class="aside">
+    <div class="fig" aria-label="Your home, lit up by the features you pick">
+      <svg id="house" viewBox="0 0 400 290" preserveAspectRatio="xMidYMax meet" role="img">
+        <title>Illustration of a home that lights up as you choose features</title>
+        <rect width="400" height="290" fill="var(--sky)"/>
+        <rect y="262" width="400" height="28" fill="var(--grass)"/>
+        <polygon points="20,290 96,262 216,262 150,290" fill="var(--s7)"/>
+        <!-- facade beams -->
+        <g data-c="outdoor"><polygon class="p fx beam" points="114,262 124,262 136,196 104,196" fill="var(--glow)" opacity="0"/><polygon class="p fx beam" points="296,262 306,262 316,196 284,196" fill="var(--glow)" opacity="0"/></g>
+        <!-- house -->
+        <rect x="108" y="120" width="204" height="142" fill="var(--wall)" stroke="var(--line)"/>
+        <rect x="262" y="120" width="50" height="142" fill="#0f2a44" opacity=".07"/>
+        <line x1="108" y1="190" x2="312" y2="190" stroke="var(--line)" stroke-width="3"/>
+        <rect x="102" y="110" width="216" height="12" rx="2" fill="var(--roof)"/>
+        <!-- solar -->
+        <g data-c="energy">
+          <g class="p sol" fill="var(--s2)">
+            <polygon points="116,110 140,110 148,90 124,90"/><polygon points="146,110 170,110 178,90 154,90"/><polygon points="176,110 200,110 208,90 184,90"/>
+          </g>
+          <g stroke="var(--roof)" stroke-width="2"><line x1="128" y1="100" x2="128" y2="110"/><line x1="158" y1="100" x2="158" y2="110"/><line x1="188" y1="100" x2="188" y2="110"/></g>
+        </g>
+        <!-- wifi -->
+        <g data-c="network" class="p fx wifi" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round" opacity="0">
+          <path d="M224 100a10 10 0 0 1 14 0"/><path d="M219 95a17 17 0 0 1 24 0"/><path d="M214 90a24 24 0 0 1 34 0"/><circle cx="231" cy="104" r="2" fill="var(--teal)"/>
+        </g>
+        <!-- tank -->
+        <g data-c="water">
+          <rect x="262" y="72" width="38" height="38" rx="7" fill="var(--s0)"/>
+          <rect class="p lvl" x="267" y="78" width="28" height="28" rx="3"/>
+          <rect x="262" y="72" width="38" height="6" rx="3" fill="#444"/>
+        </g>
+        <!-- upper floor: bedroom -->
+        <g data-c="shades">
+          <rect class="win" x="122" y="136" width="58" height="40" rx="2"/>
+          <rect class="p cur curL" x="122" y="136" width="29" height="40"/>
+          <rect class="p cur curR" x="151" y="136" width="29" height="40"/>
+          <rect x="120" y="132" width="62" height="4" fill="var(--roof)"/>
+        </g>
+        <!-- AC -->
+        <g data-c="climate">
+          <rect x="190" y="140" width="38" height="12" rx="3" fill="var(--s9)" stroke="var(--line)"/>
+          <g class="p fx air" stroke="var(--teal)" stroke-width="2" fill="none" stroke-linecap="round" opacity="0"><path d="M196 157q3 5 0 10"/><path d="M209 157q3 5 0 10"/><path d="M222 157q3 5 0 10"/></g>
+        </g>
+        <!-- study + acoustic -->
+        <g data-c="acoustic">
+          <rect class="win" x="238" y="136" width="58" height="40" rx="2"/>
+          <g class="p fx hex" fill="var(--s3)" opacity="0"><polygon points="250,150 256,146 262,150 262,157 256,161 250,157"/><polygon points="263,157 269,153 275,157 275,164 269,168 263,164"/><polygon points="276,150 282,146 288,150 288,157 282,161 276,157"/></g>
+        </g>
+        <!-- living + tv + lamp -->
+        <g data-c="av">
+          <rect class="win" x="120" y="204" width="86" height="44" rx="2"/>
+          <rect class="p tv" x="144" y="220" width="38" height="22" rx="2" fill="#1a2733"/>
+          <g class="p fx wave" fill="none" stroke="#4fb7ff" stroke-width="2" stroke-linecap="round" opacity="0"><path d="M188 226q4 5 0 10"/><path d="M193 222q7 9 0 18"/></g>
+        </g>
+        <g data-c="lighting"><line x1="163" y1="204" x2="163" y2="211" stroke="var(--roof)" stroke-width="1.5"/><path class="p lamp" d="M156 216h14l-3-6h-8z" fill="var(--s5)"/></g>
+        <!-- door, bell, cam -->
+        <rect x="214" y="210" width="26" height="52" rx="2" fill="var(--roof)"/>
+        <g data-c="security">
+          <circle class="p bell" cx="246" cy="232" r="3" fill="var(--s6)"/>
+          <circle cx="234" cy="238" r="2" fill="#fff"/>
+          <polygon class="p fx cone" points="314,198 352,236 330,250" fill="var(--teal)" opacity="0"/>
+          <rect x="306" y="192" width="12" height="7" rx="2" fill="var(--s8)" stroke="var(--line)"/>
+          <circle class="p camlight" cx="316" cy="195.5" r="1.8" fill="#8aa3b5"/>
+        </g>
+        <!-- kitchen + smoke -->
+        <g data-c="safety">
+          <rect class="win" x="252" y="206" width="46" height="30" rx="2"/>
+          <circle class="p smoke" cx="275" cy="200" r="3.2" fill="var(--s6)"/>
+        </g>
+        <!-- gate -->
+        <g data-c="gate">
+          <g fill="var(--s1)"><rect x="16" y="232" width="6" height="30"/><rect x="94" y="232" width="6" height="30"/></g>
+          <g class="p gate" stroke="var(--s1)" stroke-width="2.4"><line x1="26" y1="240" x2="90" y2="240"/><line x1="26" y1="258" x2="90" y2="258"/><line x1="32" y1="238" x2="32" y2="260"/><line x1="44" y1="238" x2="44" y2="260"/><line x1="56" y1="238" x2="56" y2="260"/><line x1="68" y1="238" x2="68" y2="260"/><line x1="80" y1="238" x2="80" y2="260"/></g>
+        </g>
+        <!-- garden -->
+        <g data-c="outdoor">
+          <rect x="350" y="226" width="8" height="36" fill="var(--s4)"/>
+          <circle cx="354" cy="210" r="22" fill="var(--leaf)"/><circle cx="340" cy="224" r="13" fill="var(--leaf)"/><circle cx="368" cy="224" r="13" fill="var(--leaf)"/>
+          <g class="p fx spr" fill="none" stroke="#4fb7ff" stroke-width="1.6" stroke-linecap="round" opacity="0"><path d="M330 262q8-14 16 0"/><path d="M326 262q12-22 24 0"/></g>
+        </g>
+      </svg>
+    </div>
+    <div class="panel mini" id="mini"></div>
+  </aside>
+</main>
+
+<div class="nav">
+  <button class="btn ghost" id="back" type="button">Back</button>
+  <span class="mid" id="mid"></span>
+  <button class="btn" id="next" type="button">Next</button>
+</div>
+
+<script>
+{
+/* ---- Settings Orbi can change ---- */
+const CFG={whatsapp:'', email:'', centre:'Orbi Automatify Experience Centre'}; // whatsapp: country code + number, digits only, e.g. 919800000000
+
+const CATS=[
+ {id:'lighting',n:'Lighting & scenes',d:'Dim, schedule and set moods. One tap for Dinner, Movie or Good night.',eg:'All lights off as you leave; soft lights at 6 pm.',w:3,cls:'lgt',lead:'Lighting control and scenes: KNX keypads (Legrand, GM, Ekinex, Vibroxx, Basalte) on new wiring, or wireless dimmers on retrofit. Lutron for premium dimming and shades.'},
+ {id:'shades',n:'Curtains & blinds',d:'Motorised curtains that open with the sunrise and close for privacy.',eg:'Bedroom curtains open at 7 am, close at sunset.',w:2,cls:'shd',lead:'Motorised curtains and blinds; check curtain-box depth and a power point at each track.'},
+ {id:'climate',n:'Climate & fresh air',d:'Control ACs from anywhere, cool the room before you reach home.',eg:'AC switches off when the balcony door opens.',w:2,cls:'clm',lead:'AC control on the app; fresh-air ventilation and heat pump hot water (new Orbi HVAC line).'},
+ {id:'security',n:'Security & entry',d:'See who is at the door, unlock for family, get alerts on your phone.',eg:'Video door phone answers on your mobile anywhere.',w:2,cls:'sec',lead:'Video door phone, smart lock, CCTV and intrusion sensors in the same app.'},
+ {id:'safety',n:'Safety sensors',d:'Gas, smoke and water leak alerts, and an SOS button for elders.',eg:'Gas leak detected: alert sent, kitchen exhaust turns on.',w:1,cls:'saf',lead:'Gas, smoke and leak sensors, SOS buttons, night path lighting.'},
+ {id:'av',n:'Home theatre & music',d:'A proper movie room, or music that follows you room to room.',eg:'"Movie" dims lights, closes curtains, starts the projector.',w:3,cls:'av',lead:'Home theatre and multi-room audio; pair with MMT Acoustix treatment for the media room.'},
+ {id:'energy',n:'Solar & energy',d:'Rooftop solar and a clear view of what your home uses.',eg:'See today\'s solar output and the units saved.',w:3,cls:'ene',lead:'Enphase rooftop solar with monitoring; energy dashboards in the app.'},
+ {id:'water',n:'Water management',d:'Tank level on your phone, the pump runs itself, leaks get stopped.',eg:'Overhead tank full: motor switches off on its own.',w:1,cls:'wat',lead:'Tank level sensing, automatic pump control, leak shut-off valves.'},
+ {id:'outdoor',n:'Garden & facade',d:'Facade and landscape lighting, garden irrigation, pool control.',eg:'Facade lights on at dusk; lawn watered at 5 am.',w:2,cls:'out',lead:'Facade and landscape lighting, irrigation, pool management.'},
+ {id:'gate',n:'Gate & garage',d:'Open the gate from the car or let a delivery in from work.',eg:'Gate opens as your car turns into the lane.',w:1,cls:'gat',lead:'Gate and shutter motor automation linked to the app and video door phone.'},
+ {id:'acoustic',n:'Acoustic comfort',d:'Quieter bedrooms, a better-sounding living room, a silent study.',eg:'Traffic noise cut down in the master bedroom.',w:2,cls:'aco',lead:'MMT Acoustix soundproofing and panels; walk them past the display wall.'},
+ {id:'network',n:'Wi-Fi everywhere',d:'Strong Wi-Fi in every room, so every device just works.',eg:'Full-speed video calls from the terrace.',w:1,cls:'net',lead:'Whole-home Wi-Fi and network backbone: the base everything else runs on.'}
+];
+/* Follow-ups shown only when a feature is marked Must have: [question, one|many, options] */
+const FU={
+ lighting:[['What matters most?','many',['Mood scenes','Dimming','Automatic on/off with motion','Saving energy','Colour or tunable white light']],['Kind of lighting','one',['Mostly downlights','Lots of cove and profile lights','A mix','Not sure yet']],['The light fittings','one',['Buying new lights too','Keeping my current lights']]],
+ shades:[['How many windows or doors?','one',['1–3','4–8','9 or more']],['What would you like?','many',['Curtains','Roller blinds','Zebra or Venetian blinds','Not decided']],['Curtain pockets in the ceiling','one',['Already planned','Still to plan','Existing curtains']]],
+ climate:[['Your ACs','many',['Split ACs','Central (VRV/VRF)','Window ACs','None yet']],['How many?','one',['1–2','3–4','5 or more']],['Also interested in','many',['Fresh-air ventilation','Heat pump hot water','Air purifiers']]],
+ security:[['What do you need?','many',['Video door phone','Smart door lock','CCTV cameras','Door and window alarms','Gate intercom']],['How many cameras?','one',['1–4','5–8','9 or more','No cameras']],['Who needs to get in?','many',['Family, on their phones','Domestic help, at set times','Deliveries and visitors']]],
+ safety:[['Which alerts?','many',['Gas leak','Smoke or fire','Water leak','SOS buttons','No-movement alert for elders']],['Who should be told?','many',['Me','Other family members','Security guard or neighbour']]],
+ av:[['What are you picturing?','one',['A dedicated theatre room','Better living room TV and sound','Music in many rooms','All of these']],['Seats','one',['2–4','5–8','9 or more']],['Screen','one',['TV','Projector','Not sure']]],
+ energy:[['Monthly power bill','one',['Under ₹3,000','₹3,000–6,000','₹6,000–10,000','Over ₹10,000']],['Terrace space','one',['Plenty, mostly free','Limited or shared','Not sure']],['Power cuts','one',['Want battery backup','Grid-connected is fine','Not sure']]],
+ water:[['What do you need?','many',['Tank level on my phone','Pump that runs itself','Borewell and sump control','Leak shut-off','Water use tracking']],['Your tanks','one',['Overhead tank only','Sump and overhead','Several tanks']]],
+ outdoor:[['What would you like?','many',['Facade lighting','Garden lighting','Irrigation','Pool','Terrace garden']],['Outdoor area','one',['Small','Medium','Large']]],
+ gate:[['What should open?','many',['Swing gate','Sliding gate','Rolling shutter','Garage door']],['Already motorised?','one',['Yes','No']]],
+ acoustic:[['Where?','many',['Bedroom','Home theatre','Study or office','Music room','Whole house, traffic noise']],['The main problem','one',['Noise coming in','Sound leaking out','Echo inside the room']]],
+ network:[['What goes wrong today?','many',['Dead spots','Slow speeds','Too many devices','Nothing yet, new home']],['Floors to cover','one',['1','2','3 or more']],['Network cables in the walls','one',['Yes, can plan them','No, wireless only']]]
+};
+const MOMENTS=[
+ ['Wake up gently','Curtains open, lights warm up slowly, the geyser is already on.'],
+ ['Leave with one tap','Lights, ACs and fans off, doors locked, cameras on.'],
+ ['Come home to comfort','Room cooled, porch light on, gate opens as you arrive.'],
+ ['Movie night','Lights dim, curtains close, the screen comes on.'],
+ ['Away on holiday','The house looks lived-in, and you get an alert if anything moves.'],
+ ['Safe at night','Soft path lights to the bathroom, nothing too bright.'],
+ ['Look after parents','Know they are fine, get an alert if they press SOS.'],
+ ['Kids\' routines','Study lights, bedtime scenes, limits on the TV.'],
+ ['Hosting guests','One tap sets the mood in the living and dining rooms.'],
+ ['Lower power bills','Solar, schedules and nothing left running.'],
+ ['Answer the door from anywhere','See and talk to visitors and delivery from your phone.'],
+ ['Good night','One switch by the bed turns the whole house off.']
+];
+const OPT={
+ src:['Walk-in at the Experience Centre','Friend or family','Instagram / Facebook','Google search','Architect or interior designer','Builder','Other'],
+ ptype:['Apartment','Villa','Independent house','Penthouse','Office / commercial','Hotel / service apartment'],
+ size:['1 BHK','2 BHK','3 BHK','4 BHK','5 BHK or more'],
+ stage:['Under construction','Being renovated','Ready, moving in soon','Living in it now'],
+ elec:['Not started','Wiring in progress','Wiring done, walls still open','Walls finished','Not sure'],
+ own:['I own it','I am renting'],
+ people:['Young children','Teenagers','Elderly parents','Pets','Domestic help','Someone works from home','We travel often'],
+ tech:['I love gadgets','Fine with apps','Keep it simple, please'],
+ decider:['I decide','Me and my family together','Our architect or designer advises','Someone else decides'],
+ rooms:['Living','Dining','Kitchen','Master bedroom','Other bedrooms','Kids\' room','Home theatre / media','Study / office','Puja room','Balconies','Garden / terrace','Staircase & corridors','Parking'],
+ control:['Mobile app','Voice (Alexa, Google, Siri)','Elegant wall keypads','Automatic, with sensors and schedules','A tablet on the wall'],
+ keypad:['Premium designer keypads (glass, metal)','Match my existing switches','No preference'],
+ existing:['Alexa or Google speaker','Smart TV','Smart bulbs or plugs','CCTV','Inverter / UPS','Nothing yet'],
+ budget:['Under ₹1.5 lakh','₹1.5–3 lakh','₹3–5 lakh','₹5–8 lakh','₹8–12 lakh','₹12–20 lakh','₹20 lakh +','Not sure, guide me'],
+ emi:['Yes, show me EMI options','No, upfront is fine'],
+ phase:['Do it all at once','Start small and add later'],
+ timeline:['Within a month','1–3 months','3–6 months','More than 6 months','Just exploring'],
+ designer:['Yes','No'],
+ consult:['Visit the Experience Centre','Site visit at my home','Phone or video call']
+};
+const STEPS=[
+ {t:'About you',h:'So we know who to get back to. We will not share your details.',qs:[['name','text','Your name',1],['phone','tel','Mobile number',1],['email','email','Email',0,'optional'],['area','text','Where is the home?',0,'area and city'],['src','one','How did you hear about Orbi?']]},
+ {t:'Your home',h:'The stage of your home decides what is possible, so this helps a lot.',qs:[['ptype','one','What kind of property?'],['size','one','Size'],['stage','one','Where is it right now?'],['elec','one','Where is the electrical work?'],['own','one','Do you own it?']]},
+ {t:'Who lives there',h:'A home with grandparents needs different things from one with a teenager.',qs:[['people','many','Who is at home?',0,'pick all that apply'],['tech','one','How do you feel about technology?'],['decider','one','Who decides on this?']]},
+ {t:'What\'s possible',h:'Here is what a smart home can do. Mark each one. Skip anything that does not matter to you.',qs:[['cats','cats']]},
+ {t:'Daily moments',h:'Which of these would make your day easier? These shape the design more than any product list.',qs:[['moments','moments']]},
+ {t:'Rooms & control',h:'Where you want it and how you like to control it.',qs:[['rooms','many','Which rooms?',0,'pick all that apply'],['control','many','How would you like to control things?',0,'pick all that apply'],['keypad','one','Switches on the wall'],['existing','many','Already have any of these?']]},
+ {t:'Budget & timeline',h:'An honest range helps us show you the right options. You can always add more later.',qs:[['budget','one','Rough budget for automation'],['emi','one','Interested in easy EMI?'],['phase','one','How would you like to go about it?'],['timeline','one','When do you want it done?'],['designer','one','Is an architect or interior designer involved?'],['designerName','text','Their name or studio',0,'optional'],['consult','one','What would you like next?'],['notes','area','Anything else we should know?',0,'optional']]},
+ {t:'Your brief',h:'',qs:[]}
+];
+const SIZEF=[.6,.8,1,1.3,1.7];
+const TIERS=['Essentials','Smart','Premium','Signature'];
+const TIER_GUIDE=['up to ₹3 L','₹3–8 L','₹8–20 L','₹20 L +']; // calibrate to Orbi pricing
+const BUDGET_TIER=[0,0,1,1,2,2,3,null];
+const KEY='orbi-planner-v1';
+const blank=()=>({cats:{},fu:{},people:[],moments:[],rooms:[],control:[],existing:[]});
+let S=blank(),step=0;
+const advisor=()=>location.hash==='#advisor';
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const lab=(k,i)=>OPT[k]&&i!=null?OPT[k][i]:'';
+const labs=(k,a)=>(a||[]).map(i=>OPT[k][i]).join(', ');
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify({S,step}))}catch(e){}}
+function phoneOk(){return String(S.phone||'').replace(/\D/g,'').length>=10}
+function stepOk(i){return i!==0||(String(S.name||'').trim()&&phoneOk())}
+
+function qHTML(q){
+ const [k,type,l,req,hint]=q;
+ const head=l?`<span class="qt" id="l-${k}">${esc(l)}${req?' *':''}${hint?` <small>(${esc(hint)})</small>`:''}</span>`:'';
+ if(type==='text'||type==='tel'||type==='email'){
+  const ac={name:'name',phone:'tel',email:'email'}[k]||'off';
+  return `<div class="q"><label class="qt" for="f-${k}">${esc(l)}${req?' *':''}${hint?` <small>(${esc(hint)})</small>`:''}</label><input id="f-${k}" data-in="${k}" type="${type}" autocomplete="${ac}" ${type==='tel'?'inputmode="tel"':''} value="${esc(S[k])}"><div class="err" id="e-${k}"></div></div>`;
+ }
+ if(type==='area')return `<div class="q"><label class="qt" for="f-${k}">${esc(l)} <small>(${esc(hint)})</small></label><textarea id="f-${k}" data-in="${k}">${esc(S[k])}</textarea></div>`;
+ if(type==='one'||type==='many')return `<div class="q" role="group" aria-labelledby="l-${k}">${head}<div class="chips">${OPT[k].map((o,i)=>`<button type="button" class="chip" data-k="${k}" data-t="${type}" data-i="${i}" aria-pressed="false">${esc(o)}</button>`).join('')}</div></div>`;
+ if(type==='cats')return `<div class="cards">${CATS.map(c=>`<div class="card" id="c-${c.id}"><h3>${esc(c.n)}</h3><p>${esc(c.d)}</p><div class="eg">For example: ${esc(c.eg)}</div><div class="seg" role="group" aria-label="${esc(c.n)}">${[['Must have',2],['Nice to have',1],['Not needed',0]].map(([t,v])=>`<button type="button" data-cat="${c.id}" data-v="${v}" aria-pressed="false">${t}</button>`).join('')}</div>${fuHTML(c)}</div>`).join('')}</div>`;
+ if(type==='moments')return `<div class="cards">${MOMENTS.map((m,i)=>`<button type="button" class="tog" data-k="moments" data-t="many" data-i="${i}" aria-pressed="false"><b>${esc(m[0])}</b><span>${esc(m[1])}</span></button>`).join('')}</div>`;
+ return '';
+}
+
+function fuHTML(c){
+ const qs=FU[c.id]||[];
+ return `<div class="fu" aria-live="polite"><p class="fuh">A few quick taps so we size this right. All optional.</p>${qs.map(([l,t,o],q)=>`<div role="group" aria-label="${esc(l)}"><span class="qt">${esc(l)}</span><div class="chips">${o.map((x,i)=>`<button type="button" class="chip" data-fu="${c.id}" data-q="${q}" data-t="${t}" data-i="${i}" aria-pressed="false">${esc(x)}</button>`).join('')}</div></div>`).join('')}</div>`;
+}
+function fuGet(id,q){return ((S.fu||{})[id]||{})[q]}
+function fuText(id){
+ return (FU[id]||[]).map(([l,t,o],q)=>{const v=fuGet(id,q);if(v==null||(Array.isArray(v)&&!v.length))return '';return l.replace(/\?$/,'')+': '+(t==='many'?v.map(i=>o[i]).join(', '):o[v])}).filter(Boolean).join('; ');
+}
+function render(){
+ const st=STEPS[step];
+ $('steps').innerHTML=STEPS.map((s,i)=>`<button type="button" data-step="${i}" class="${i!==step&&visited(i)?'done':''}" ${i===step?'aria-current="step"':''}>${esc(s.t)}</button>`).join('');
+ $('form').innerHTML=step===7?briefHTML():`<h2 class="sh">${esc(st.t)}</h2><p class="sub">${esc(st.h)}</p>${st.qs.map(qHTML).join('')}`;
+ syncPressed();
+ $('back').hidden=step===0;
+ $('next').textContent=step===6?'See my brief':step===7?'Start over':'Next';
+ $('mid').textContent=`Step ${step+1} of ${STEPS.length}`;
+ $('advbox').classList.toggle('hidden',!advisor());
+ document.body.classList.toggle('advisor',advisor());
+ const cur=$('steps').querySelector('[aria-current]');if(cur)cur.scrollIntoView({block:'nearest',inline:'center'});
+ paint();
+}
+function visited(i){
+ if(i===0)return stepOk(0);
+ return STEPS[i].qs.some(q=>{const v=q[1]==='cats'?Object.keys(S.cats).length:S[q[0]];return Array.isArray(v)?v.length:v!=null&&v!==''&&v!==0||v===0});
+}
+function syncPressed(){
+ document.querySelectorAll('[data-k]').forEach(b=>{const k=b.dataset.k,i=+b.dataset.i;const on=b.dataset.t==='many'?(S[k]||[]).includes(i):S[k]===i;b.setAttribute('aria-pressed',on)});
+ document.querySelectorAll('[data-cat]').forEach(b=>{const v=S.cats[b.dataset.cat];b.setAttribute('aria-pressed',v===+b.dataset.v)});
+ document.querySelectorAll('[data-fu]').forEach(b=>{const v=fuGet(b.dataset.fu,+b.dataset.q),i=+b.dataset.i;b.setAttribute('aria-pressed',Array.isArray(v)?v.includes(i):v===i)});
+ CATS.forEach(c=>{const el=$('c-'+c.id);if(el)el.className='card'+(S.cats[c.id]!=null?' v'+S.cats[c.id]:'')});
+}
+function paint(){
+ const svg=$('house');
+ CATS.forEach(c=>svg.classList.toggle(c.cls,(S.cats[c.id]||0)>0));
+ const must=CATS.filter(c=>S.cats[c.id]===2),nice=CATS.filter(c=>S.cats[c.id]===1);
+ const done=STEPS.slice(0,7).filter((s,i)=>visited(i)).length;
+ let h=`<h3>Your brief so far</h3><div class="bar"><i style="width:${Math.round(done/7*100)}%"></i></div><p>${done} of 7 sections answered</p>`;
+ h+=must.length||nice.length?`<h3 style="margin-top:14px">Lighting up your home</h3><div class="lit">${must.map(c=>`<span class="m">${esc(c.n)}</span>`).join('')}${nice.map(c=>`<span>${esc(c.n)}</span>`).join('')}</div>`:`<p style="margin-top:10px">Mark features in "What's possible" and watch the house light up. Filled chips are must-haves.</p>`;
+ if(advisor()){const a=analyze();h+=`<h3 style="margin-top:14px">Lead: ${a.temp}</h3><p>Score ${a.score}/100 · scope ${TIERS[a.scope]}${a.bt!=null?' · budget '+TIERS[a.bt]:''}</p>`}
+ $('mini').innerHTML=h;
+}
+
+/* ---- brief + encoding ---- */
+function clean(o){const r={};for(const[k,v]of Object.entries(o)){if(v==null||v===''||(Array.isArray(v)&&!v.length)||(typeof v==='object'&&!Array.isArray(v)&&!Object.keys(v).length))continue;r[k]=v}return r}
+function enc(o){const b=new TextEncoder().encode(JSON.stringify(clean(o)));let s='';b.forEach(x=>s+=String.fromCharCode(x));return btoa(s)}
+function dec(c){const s=atob(c);const b=Uint8Array.from(s,ch=>ch.charCodeAt(0));return JSON.parse(new TextDecoder().decode(b))}
+function rows(){
+ const must=CATS.filter(c=>S.cats[c.id]===2).map(c=>c.n).join(', '),nice=CATS.filter(c=>S.cats[c.id]===1).map(c=>c.n).join(', ');
+ const home=[lab('size',S.size),lab('ptype',S.ptype),S.area].filter(Boolean).join(', ');
+ return [
+  ['Contact',[['Name',S.name],['Mobile',S.phone],['Email',S.email],['Heard via',lab('src',S.src)]]],
+  ['Home',[['Property',home],['Stage',lab('stage',S.stage)],['Electrical',lab('elec',S.elec)],['Ownership',lab('own',S.own)]]],
+  ['Household',[['At home',labs('people',S.people)],['Tech comfort',lab('tech',S.tech)],['Decides',lab('decider',S.decider)]]],
+  ['What they want',[['Must have',must],['Nice to have',nice],['Moments',(S.moments||[]).map(i=>MOMENTS[i][0]).join(', ')]]],
+  ['Must-have details',CATS.filter(c=>S.cats[c.id]===2&&fuText(c.id)).map(c=>[c.n,fuText(c.id)])],
+  ['Rooms & control',[['Rooms',labs('rooms',S.rooms)],['Control',labs('control',S.control)],['Wall switches',lab('keypad',S.keypad)],['Already has',labs('existing',S.existing)]]],
+  ['Budget & timeline',[['Budget',lab('budget',S.budget)],['EMI',lab('emi',S.emi)],['Approach',lab('phase',S.phase)],['Timeline',lab('timeline',S.timeline)],['Designer',[lab('designer',S.designer),S.designerName].filter(Boolean).join(': ')],['Next step',lab('consult',S.consult)],['Notes',S.notes]]]
+ ];
+}
+function briefText(){
+ let t='My smart home brief for Orbi Automatify\n';
+ rows().forEach(([h,r])=>{const f=r.filter(x=>x[1]);if(f.length){t+='\n'+h.toUpperCase()+'\n';f.forEach(([k,v])=>t+=`${k}: ${v}\n`)}});
+ return t+'\nORBI-REF:'+enc(S);
+}
+function briefHTML(){
+ const txt=briefText();
+ const wa='https://wa.me/'+CFG.whatsapp+'?text='+encodeURIComponent(txt);
+ const ml='mailto:'+CFG.email+'?subject='+encodeURIComponent('Smart home brief: '+(S.name||''))+'&body='+encodeURIComponent(txt);
+ const body=rows().map(([h,r])=>{const f=r.filter(x=>x[1]);return f.length?`<h3>${esc(h)}</h3><dl>${f.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`:''}).join('');
+ return `${advisor()?analysisHTML():''}<div class="brief"><h2 class="sh">${S.name?esc(S.name.split(' ')[0])+', here is your brief':'Your brief'}</h2><p class="sub">Check it over, then send it to us. Our team will come back with a design and options that fit your budget, before any product talk.</p>
+ <div class="acts"><a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">Send on WhatsApp</a>${CFG.email?`<a class="btn ghost" href="${esc(ml)}">Email it</a>`:''}<button type="button" class="btn ghost" id="copy">Copy brief</button></div>
+ <p class="note" id="copymsg">${CFG.email?'Or email it to '+esc(CFG.email)+'. ':''}Please send the whole message, including the reference line at the end.</p>
+ ${body}<details><summary>See the message text</summary><textarea id="brieftxt" readonly style="min-height:220px;margin-top:10px">${esc(txt)}</textarea></details></div>`;
+}
+
+/* ---- advisor analysis ---- */
+function analyze(){
+ let pts=0;CATS.forEach(c=>{const v=S.cats[c.id];pts+=c.w*(v===2?1:v===1?.5:0)});
+ let f=SIZEF[S.size??2];if(S.ptype===1||S.ptype===2)f*=1.2;if(S.ptype===3)f*=1.3;
+ const g=(id,q)=>S.cats[id]===2?fuGet(id,q):undefined;
+ if(g('shades',0)===2)pts+=1;if(g('security',1)===2)pts+=1;if(g('climate',1)===2)pts+=1;if(g('av',0)===0||g('av',0)===3)pts+=2;
+ pts*=f;
+ const scope=pts<4?0:pts<9?1:pts<15?2:3;
+ const bt=S.budget==null?null:BUDGET_TIER[S.budget];
+ let score=0;
+ score+=S.timeline!=null?[30,24,14,6,0][S.timeline]:0;
+ score+=S.decider!=null?[20,20,10,5][S.decider]:0;
+ score+=S.budget==null?0:S.budget===7?6:15;
+ score+=S.stage!=null?[20,15,12,8][S.stage]:0;
+ score+=S.consult!=null?[12,15,8][S.consult]:0;
+ const temp=score>=70?'Hot':score>=45?'Warm':'Early stage';
+ const wired=(S.stage===0||S.stage===1)&&[0,1,2].includes(S.elec);
+ const platform=S.own===1?'Renting: wireless, plug-and-play only. Nothing that needs rewiring or chasing walls; everything should move with them.'
+  :wired?'Walls are open: this is the moment for a wired system. KNX keypads (Legrand, GM, Ekinex, Vibroxx; Basalte for premium) or Lutron, with conduits and back boxes planned now. Ask for the electrical drawings before the conduits close.'
+  :S.elec===4?'Electrical stage unknown: confirm on the first call. It decides wired KNX versus wireless retrofit.'
+  :'Finished walls: wireless retrofit (Doch, Cue, Legrand IoT) behind existing switch plates; go hybrid in any room being redone. Home Assistant bridge if they want brands in one app.';
+ const has=i=>(S.people||[]).includes(i);
+ const flags=[],asks=[];
+ if(bt!=null&&bt<scope)flags.push(`Wish list (${TIERS[scope]}) is bigger than the budget (${TIERS[bt]}). Propose phase 1 on the must-haves${S.phase===1?', which they are open to':''}${S.emi===0?', and show Bajaj Finance EMI':''}.`);
+ if(bt!=null&&bt>scope)flags.push(`Budget (${TIERS[bt]}) is above the wish list (${TIERS[scope]}). Room to show premium keypads, Lutron shades or a media room.`);
+ if(S.budget===7)asks.push('Budget not given: show the Essentials, Smart and Premium packages side by side and watch which one they lean into.');
+ if(S.emi===0&&!flags.some(x=>x.includes('EMI')))flags.push('Asked about EMI: lead with the monthly figure on Bajaj Finance.');
+ if(S.designer===0)asks.push(`Designer involved${S.designerName?' ('+S.designerName+')':''}: get their contact and invite them to the centre. They often decide the switch brand.`);
+ if(S.decider===3||S.decider===2)asks.push('Someone else signs off: find out who, and book the next meeting with them present.');
+ if(has(2))flags.push('Elderly parents at home: demo SOS, night path lighting and simple wall keypads over the app.');
+ if(has(6)||(S.moments||[]).includes(4))flags.push('Travel often: demo away mode, presence simulation and camera alerts on the phone.');
+ if(has(3))asks.push('Pets: plan pet-immune motion sensors and check where they roam.');
+ if(has(5))flags.push('Works from home: study lighting, acoustics and solid Wi-Fi matter more than usual.');
+ if(S.tech===2)flags.push('Wants it simple: keep the demo to scenes on keypads, not the app menus.');
+ if(S.elec===4)asks.push('Confirm the electrical stage and get the layout drawings.');
+ if(!(S.rooms||[]).length)asks.push('Rooms not chosen: walk through the floor plan room by room.');
+ if(S.timeline===0)flags.push('Wants it within a month: check stock and the installation calendar before quoting.');
+ if((S.existing||[]).includes(3)&&S.cats.security>0)asks.push('Has CCTV already: ask the brand and model, and whether to integrate it or replace it.');
+ const inc=(id,q,i)=>{const v=g(id,q);return Array.isArray(v)&&v.includes(i)};
+ if((g('energy',0)===2||g('energy',0)===3)&&g('energy',1)===0)flags.push('Strong solar case: high bill and a free terrace. Size the Enphase system from their bill and show the payback.');
+ if(g('energy',2)===0)asks.push('Wants battery backup with solar: check essential loads and where the inverter will sit.');
+ if(g('shades',2)===1)flags.push('Curtain pockets not planned yet: settle them with the designer before the false ceiling goes up.');
+ if(g('network',2)===0&&wired)flags.push('Open to network cabling: plan Cat6 runs and access points now, alongside the electrical conduits.');
+ if(g('lighting',2)===0)flags.push('Buying new light fittings: quote the lighting supply with the controls in one package.');
+ if(inc('security',2,1))asks.push('Domestic help needs access: show time-limited lock codes and the entry log.');
+ if(inc('climate',2,0)||inc('climate',2,1))flags.push('Interested in fresh air or heat pumps: bring in the new HVAC line.');
+ if(g('av',0)===0)asks.push('Dedicated theatre: get the room size and plan the acoustic treatment and seating with the screen.');
+ if(inc('water',0,2))asks.push('Borewell and sump: check the pump ratings and the panel location.');
+ const must=CATS.filter(c=>S.cats[c.id]===2);
+ return {pts,scope,bt,score,temp,platform,flags,asks,must};
+}
+function analysisHTML(){
+ const a=analyze();
+ const cls=a.temp==='Hot'?'hot':a.temp==='Warm'?'warm':'cold';
+ const ladder=(name,t)=>`<span>${name}</span>${TIERS.map((x,i)=>`<div class="c ${i===t?'x':''}">${x}</div>`).join('')}`;
+ return `<div class="adv"><h2>For the Orbi team</h2>
+ <div class="temp ${cls}"><b>${a.temp}</b><span>Lead score ${a.score} of 100</span></div><div class="bar"><i style="width:${a.score}%"></i></div>
+ <h3>Wish list against budget</h3><div class="ladder"><span></span>${TIER_GUIDE.map(g=>`<span class="h">${g}</span>`).join('')}${ladder('Wish list',a.scope)}${a.bt!=null?ladder('Budget',a.bt):'<span>Budget</span><div class="c" style="grid-column:span 4">Not given</div>'}</div>
+ <h3>Platform</h3><p style="margin:0">${esc(a.platform)}</p>
+ ${a.must.length?`<h3>Lead with their must-haves</h3><ul>${a.must.map(c=>`<li><b>${esc(c.n)}.</b> ${fuText(c.id)?`<i>They said: ${esc(fuText(c.id))}.</i> `:''}${esc(c.lead)}</li>`).join('')}</ul>`:''}
+ ${a.flags.length?`<h3>Points to plan around</h3><ul>${a.flags.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+ ${a.asks.length?`<h3>Ask next</h3><ul>${a.asks.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+ <p class="note" style="margin-top:14px">Score: timeline 30, decision-maker 20, stage 20, budget given 15, next step chosen 15. Tier price guides are set in the page settings.</p></div>`;
+}
+
+/* ---- events ---- */
+$('form').addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.cat){const id=b.dataset.cat,v=+b.dataset.v;const was=S.cats[id];if(was===v)delete S.cats[id];else S.cats[id]=v;
+  if(v===2&&was!==2){syncPressed();const card=$('c-'+id);if(card&&!matchMedia('(prefers-reduced-motion: reduce)').matches)card.scrollIntoView({block:'nearest',behavior:'smooth'});paint();save();return}}
+ else if(b.dataset.fu){const id=b.dataset.fu,q=+b.dataset.q,i=+b.dataset.i;S.fu=S.fu||{};const f=S.fu[id]||(S.fu[id]={});
+  if(b.dataset.t==='many'){const a=Array.isArray(f[q])?f[q]:(f[q]=[]);const j=a.indexOf(i);if(j>=0)a.splice(j,1);else a.push(i)}
+  else{if(f[q]===i)delete f[q];else f[q]=i}}
+ else if(b.dataset.k){const k=b.dataset.k,i=+b.dataset.i;
+  if(b.dataset.t==='many'){const a=S[k]||(S[k]=[]);const j=a.indexOf(i);if(j>=0)a.splice(j,1);else{if(k==='existing'&&i===5)a.length=0;else if(k==='existing'){const n=a.indexOf(5);if(n>=0)a.splice(n,1)}a.push(i)}}
+  else S[k]=S[k]===i?undefined:i}
+ else if(b.id==='copy'){const t=briefText();const done=()=>$('copymsg').textContent='Copied. Paste it into WhatsApp or email to Orbi.';
+  const fb=()=>{const ta=$('brieftxt');ta.closest('details').open=true;ta.select();$('copymsg').textContent='Select all and copy the message below.'};
+  try{navigator.clipboard.writeText(t).then(done,fb)}catch(err){fb()}
+  return}
+ else return;
+ syncPressed();paint();save();
+});
+$('form').addEventListener('input',e=>{const k=e.target.dataset.in;if(!k)return;S[k]=e.target.value;if($('e-'+k))$('e-'+k).textContent='';paint();save()});
+$('form').addEventListener('submit',e=>e.preventDefault());
+function go(n){
+ if(n>step&&!stepOk(0)&&step===0){if(!String(S.name||'').trim())$('e-name').textContent='Please add your name.';if(!phoneOk())$('e-phone').textContent='Please add a 10-digit mobile number.';return}
+ if(n>0&&!stepOk(0)){step=0;render();go(1);return}
+ step=Math.max(0,Math.min(7,n));render();save();window.scrollTo({top:0,behavior:'smooth'});
+}
+$('next').addEventListener('click',()=>{if(step===7){S=blank();step=0;try{localStorage.removeItem(KEY)}catch(e){}render();window.scrollTo({top:0});return}go(step+1)});
+$('back').addEventListener('click',()=>go(step-1));
+$('steps').addEventListener('click',e=>{const b=e.target.closest('[data-step]');if(b)go(+b.dataset.step)});
+$('loadbtn').addEventListener('click',()=>{
+ const raw=$('pastein').value;const m=raw.match(/ORBI-REF:\s*([A-Za-z0-9+\/=\s]+)/);
+ if(!m){$('pasteerr').textContent='No ORBI-REF line found. Ask the customer to send the whole message.';return}
+ try{S=Object.assign(blank(),dec(m[1].replace(/\s/g,'')));$('pasteerr').textContent='';$('pastein').value='';step=7;render();save()}catch(err){$('pasteerr').textContent='That reference looks cut off. Ask for the full message again.'}
+});
+$('newbtn').addEventListener('click',()=>{S=blank();step=0;try{localStorage.removeItem(KEY)}catch(e){}render()});
+$('samplebtn').addEventListener('click',()=>{S=Object.assign(blank(),{name:'Ananya Rao (sample)',phone:'98450 12345',email:'ananya@example.com',area:'Sarjapur Road, Bengaluru',src:4,ptype:1,size:3,stage:0,elec:0,own:0,people:[2,3,5],tech:1,decider:1,cats:{lighting:2,shades:2,climate:1,security:2,safety:2,av:1,energy:1,water:2,outdoor:1,gate:1,acoustic:0,network:2},fu:{lighting:{0:[0,1,2],1:2,2:0},shades:{0:1,1:[0,1],2:1},security:{0:[0,1,2,3],1:1,2:[0,1]},safety:{0:[0,1,3,4],1:[0,1]},water:{0:[0,1,2],1:1},network:{0:[3],1:1,2:0}},moments:[0,1,2,5,6,10],rooms:[0,1,2,3,4,7,9,10],control:[0,1,2],keypad:0,existing:[0,1],budget:4,emi:0,phase:1,timeline:1,designer:0,designerName:'Studio Kaya',consult:1,notes:'Mother uses a walker; wants soft lights to the bathroom at night.'});step=7;render()});
+window.addEventListener('hashchange',render);
+
+function start(d){
+ if(d&&d.S){S=Object.assign(blank(),d.S);step=d.step||0}
+ else{try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r&&r.S){S=Object.assign(blank(),r.S);step=r.step||0}}catch(e){}}
+ render();
+}
+window.claude?.hot?.snapshot?.(()=>({S,step}));
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+}
+</script>
+</body>
+</html>
